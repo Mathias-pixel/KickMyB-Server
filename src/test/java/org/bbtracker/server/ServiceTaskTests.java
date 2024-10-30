@@ -24,6 +24,7 @@ import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.Assert.assertEquals;
@@ -122,6 +123,21 @@ class ServiceTaskTests {
             fail("Aurait du lancer ServiceTask.Existing");
         } catch (Exception e) {
             assertEquals(ServiceTask.Existing.class, e.getClass());
+        }
+    }
+
+    @Test
+    void testDeleteTaskSansTask() throws ServiceTask.Empty, ServiceTask.TooShort, ServiceTask.Existing {
+        MUser user = new MUser();
+        user.username = "bob";
+        user.password = passwordEncoder.encode("Motdepassecomplique20");
+        userRepository.saveAndFlush(user);
+
+        try{
+         serviceTask.deleteTask(0L, user);
+         fail("Aurait du lancer ServiceTask.NoSuchElementException");
+        } catch (Exception e) {
+            assertEquals(NoSuchElementException.class, e.getClass());
         }
     }
 

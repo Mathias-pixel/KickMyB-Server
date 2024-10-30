@@ -5,6 +5,7 @@ import org.kickmyb.transfer.*;
 
 
 import java.util.List;
+import java.util.NoSuchElementException;
 
 public interface ServiceTask {
 
@@ -19,7 +20,7 @@ public interface ServiceTask {
     List<HomeItemResponse> home(Long userID);
     TaskDetailPhotoResponse detailPhoto(Long id, MUser user);
     List<HomeItemPhotoResponse> homePhoto(Long userID);
-    void deleteTask(Long taskId, MUser user);
+    void deleteTask(Long taskId, MUser user) throws NoSuchElementException;
 
     // Potential web demo for JS injection
     String index();

@@ -13,6 +13,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
+import java.util.NoSuchElementException;
 
 @Component
 @Transactional
@@ -157,20 +158,22 @@ public class ServiceTaskImpl implements ServiceTask {
     }
 
     @Override
-    public void deleteTask(Long id, MUser user) {
-        MTask element = repo.findById(id).get();
+    public void deleteTask(Long id, MUser user) throws NoSuchElementException {
+        if(repo.findById(id).isPresent()){
+            MTask element = repo.findById(id).get();
 
+            if(repoPics.findByTask(element).isPresent()){
+                MPhoto photo = repoPics.findByTask(element).get();
+                repoPics.delete(photo);
+            }
 
-        if(repoPics.findByTask(element).isPresent()){
-            MPhoto photo = repoPics.findByTask(element).get();
-            repoPics.delete(photo);
+            repo.delete(element);
+            user.tasks.remove(element);
+            repoUser.save(user);
         }
-
-        repo.delete(element);
-
-        user.tasks.remove(element);
-        repoUser.save(user);
-
+        else{
+            throw new NoSuchElementException();
+        }
     }
 
     @Override
