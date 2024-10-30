@@ -154,8 +154,14 @@ public class ServiceTaskImpl implements ServiceTask {
     }
 
     @Override
-    public void deleteTask(Long taskId, MUser user) {
-        
+    public void deleteTask(Long id, MUser user) {
+        MTask element = repo.findById(id).get();
+
+        repo.delete(element);
+
+        user.tasks.remove(element);
+        repoUser.save(user);
+
     }
 
     @Override
