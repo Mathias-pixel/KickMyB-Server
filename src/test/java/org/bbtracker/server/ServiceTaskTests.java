@@ -8,8 +8,12 @@ import org.kickmyb.server.account.BadCredentialsException;
 import org.kickmyb.server.account.MUser;
 import org.kickmyb.server.account.MUserRepository;
 import org.kickmyb.server.account.ServiceAccount;
+import org.kickmyb.server.photo.MPhotoRepository;
+import org.kickmyb.server.photo.ServicePhoto;
+import org.kickmyb.server.task.MTaskRepository;
 import org.kickmyb.server.task.ServiceTask;
 import org.kickmyb.transfer.AddTaskRequest;
+import org.kickmyb.transfer.HomeItemResponse;
 import org.kickmyb.transfer.SignupRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
@@ -19,6 +23,7 @@ import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
 
 import java.util.Date;
+import java.util.List;
 
 import static org.assertj.core.api.Fail.fail;
 import static org.junit.Assert.assertEquals;
@@ -36,10 +41,15 @@ class ServiceTaskTests {
     @Autowired
     private MUserRepository userRepository;
     @Autowired
+    private MPhotoRepository photoRepository;
+    @Autowired
     private PasswordEncoder passwordEncoder;
 
     @Autowired
     private ServiceTask serviceTask;
+
+    @Autowired
+    private ServicePhoto servicePhoto;
 
     @Test
     void testAddTask() throws ServiceTask.Empty, ServiceTask.TooShort, ServiceTask.Existing {
@@ -114,4 +124,49 @@ class ServiceTaskTests {
             assertEquals(ServiceTask.Existing.class, e.getClass());
         }
     }
+
+    @Test
+    void testDeleteTaskSansPhoto() throws ServiceTask.Empty, ServiceTask.TooShort, ServiceTask.Existing {
+        MUser user = new MUser();
+        user.username = "bob";
+        user.password = passwordEncoder.encode("Motdepassecomplique20");
+        userRepository.saveAndFlush(user);
+
+        AddTaskRequest atr = new AddTaskRequest();
+        atr.name = "Bonne tâche";
+        atr.deadline = Date.from(new Date().toInstant().plusSeconds(3600));
+
+        serviceTask.addOne(atr, user);
+        List<HomeItemResponse> taskList = serviceTask.home(user.id);
+        HomeItemResponse task = taskList.get(0);
+        try{
+            serviceTask.deleteTask(task.id, user);
+            Assertions.assertEquals(0, serviceTask.home(user.id).size());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
+
+    @Test
+    void testDeleteTaskAvecPhoto() throws ServiceTask.Empty, ServiceTask.TooShort, ServiceTask.Existing {
+        MUser user = new MUser();
+        user.username = "bob";
+        user.password = passwordEncoder.encode("Motdepassecomplique20");
+        userRepository.saveAndFlush(user);
+
+        AddTaskRequest atr = new AddTaskRequest();
+        atr.name = "Bonne tâche";
+        atr.deadline = Date.from(new Date().toInstant().plusSeconds(3600));
+
+        serviceTask.addOne(atr, user);
+        List<HomeItemResponse> taskList = serviceTask.home(user.id);
+        HomeItemResponse task = taskList.get(0);
+        try{
+            serviceTask.deleteTask(task.id, user);
+            Assertions.assertEquals(0, serviceTask.home(user.id).size());
+        } catch (Exception e) {
+            throw new RuntimeException(e);
+        }
+    }
 }
+

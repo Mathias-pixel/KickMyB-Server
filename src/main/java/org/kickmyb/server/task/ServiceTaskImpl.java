@@ -160,9 +160,12 @@ public class ServiceTaskImpl implements ServiceTask {
     public void deleteTask(Long id, MUser user) {
         MTask element = repo.findById(id).get();
 
-        MPhoto existing = repoPics.findByTask(element).get();
-        repoPics.delete(existing);
-        
+
+        if(repoPics.findByTask(element).isPresent()){
+            MPhoto photo = repoPics.findByTask(element).get();
+            repoPics.delete(photo);
+        }
+
         repo.delete(element);
 
         user.tasks.remove(element);
