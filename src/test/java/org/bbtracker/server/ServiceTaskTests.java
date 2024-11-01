@@ -21,6 +21,7 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.test.annotation.DirtiesContext;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Date;
 import java.util.List;
@@ -142,6 +143,7 @@ class ServiceTaskTests {
     }
 
     @Test
+    @Transactional
     void testDeleteTaskSansPhoto() throws ServiceTask.Empty, ServiceTask.TooShort, ServiceTask.Existing {
         MUser user = new MUser();
         user.username = "bob";
